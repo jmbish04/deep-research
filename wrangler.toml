@@ -1,0 +1,33 @@
+#:schema node_modules/wrangler/config-schema.json
+name = "deep-research"
+main = "src/index.tsx"
+compatibility_date = "2025-01-28"
+compatibility_flags = [ "nodejs_compat" ]
+workers_dev = true
+
+[observability]
+enabled = true
+
+[ai]
+binding = "AI"
+
+[build]
+command = "npm run build-css"
+watch_dir = "./src"
+
+[assets]
+directory = "./src/static/"
+
+[[workflows]]
+name = "workers-reseacher-workflow"
+binding = "RESEARCH_WORKFLOW"
+class_name = "ResearchWorkflow"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "workers-research"
+database_id = "46ad51a6-9320-43de-a9a3-70754cc8bf47"
+preview_database_id = "db6662eb-c46e-461f-9bce-05807b6dfa98"
+
+[browser]
+binding = "BROWSER"
