@@ -7,7 +7,7 @@ import { z } from "zod";
 import type { Env, Variables } from "./bindings";
 import { renderMarkdownReportContent } from "./markdown";
 import { migrations } from "./migrations";
-import { FOLLOWUP_QUESTIONS_PROMPT, SUMMARIZE_PROMPT } from "./prompts";
+import { FOLLOWUP_QUESTIONS_PROMPT, SUMMARIZE_PROMPT, REPORT_TITLE_PROMPT} from "./prompts";
 import {
 	CreateResearch,
 	ErrorPage,
