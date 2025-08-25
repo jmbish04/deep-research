@@ -199,11 +199,17 @@ app.post("/create", async (c) => {
 		answer: answers[i],
 	}));
 
+	// const { text: title } = await generateText({
+	// 	model: getModel(c.env),
+	// 	system: SUMMARIZE_PROMPT(),
+	// 	prompt: form.get("query") as string,
+	// });
+
 	const { text: title } = await generateText({
-		model: getModel(c.env),
-		system: SUMMARIZE_PROMPT(),
-		prompt: form.get("query") as string,
-	});
+	  model: getModel(c.env),
+	  system: REPORT_TITLE_PROMPT(),
+	  prompt: form.get("query") as string,
+	});	
 
 	const initialLearnings = form.get("initial-learnings") as string | undefined;
 	const browseInternetFormValue = form.get("browse_internet");
@@ -417,28 +423,40 @@ app.get("/details/:id/download/pdf", async (c) => {
 	const content = resp.results.result ?? "";
 	const htmlContent = renderMarkdownReportContent(content);
 
-	// Extract title from research questions or use a default
-	let reportTitle = "Deep Research Report";
+	// // Extract title from research questions or use a default
+	// let reportTitle = "Deep Research Report";
 
+	// try {
+	// 	// resp.results.questions is a JSON string array of objects: [{ question: string, answer: string }, ...]
+	// 	const raw = resp?.results?.questions;
+	// 	if (typeof raw === "string" && raw.trim().length) {
+	// 		const questions = JSON.parse(raw) as Array<{
+	// 			question?: string;
+	// 			answer?: string;
+	// 		}>;
+	// 		const first = Array.isArray(questions) ? questions[0] : undefined;
+	// 		const candidate =
+	// 			first && typeof first.question === "string" && first.question.trim()
+	// 				? first.question.trim()
+	// 				: "";
+	// 		reportTitle = candidate || reportTitle;
+	// 	}
+	// } catch (err) {
+	// 	// Non-fatal: fall back to default title
+	// 	console.error("Failed to parse questions for PDF title:", err);
+	// }
+
+	let reportTitle = "Deep Research Report";
+	
 	try {
-		// resp.results.questions is a JSON string array of objects: [{ question: string, answer: string }, ...]
-		const raw = resp?.results?.questions;
-		if (typeof raw === "string" && raw.trim().length) {
-			const questions = JSON.parse(raw) as Array<{
-				question?: string;
-				answer?: string;
-			}>;
-			const first = Array.isArray(questions) ? questions[0] : undefined;
-			const candidate =
-				first && typeof first.question === "string" && first.question.trim()
-					? first.question.trim()
-					: "";
-			reportTitle = candidate || reportTitle;
-		}
+	  const dbTitle = resp?.results?.title;
+	  if (typeof dbTitle === "string" && dbTitle.trim().length) {
+	    reportTitle = dbTitle.trim();
+	  }
 	} catch (err) {
-		// Non-fatal: fall back to default title
-		console.error("Failed to parse questions for PDF title:", err);
-	}
+	  console.error("Failed to read title from DB:", err);
+	  // fallback stays "Deep Research Report"
+	}	
 
 	const escapedTitle = escapeHtml(reportTitle);
 	// const generationDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
