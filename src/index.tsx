@@ -408,8 +408,22 @@ app.get("/details/:id/download/pdf", async (c) => {
 	const htmlContent = renderMarkdownReportContent(content);
 	
 	// Extract title from research questions or use a default
-	const questions = JSON.parse(resp.results.questions as unknown as string);
-	const reportTitle = questions[0] || "Deep Research Report";
+	let reportTitle = "Deep Research Report";
+	try {
+		const questions = JSON.parse(resp.results.questions as unknown as string);
+		if (questions?.[0]?.question) {
+			const unsafeTitle = questions[0].question;
+			// Escape HTML to prevent XSS in the PDF header
+			reportTitle = unsafeTitle
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#039;");
+		}
+	} catch (error) {
+		console.error("Failed to parse research questions for PDF title:", error);
+	}
 	
 	// Generate current date for footer
 	const generationDate = new Date().toLocaleDateString('en-US', {
