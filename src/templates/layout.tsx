@@ -965,12 +965,19 @@ export const NewResearchQuestions: FC = (props) => {
 							<span className="question-text">{obj}</span>
 							<span className="text-red-500 ml-1">*</span>
 						</label>
-						<input
+					{/*
+	 						<input
 							type="text"
 							name={"followup_" + i}
 							className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
 							required
-						/>
+						/> 
+	  				*/}
+						<textarea
+						    name={"followup_" + i}
+						    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+						    required
+						></textarea>						
 					</div>
 				))}
 			</div>
