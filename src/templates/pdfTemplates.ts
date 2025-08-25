@@ -2,11 +2,20 @@
 export const createHeaderTemplate = (escapedTitle: string): string => `
   <style>
     .pdf-header {
-      box-sizing: border-box; width: 100%; font-size: 10px;
-      padding: 10px 20px; margin: 0; background: #f8f9fa;
+      box-sizing: border-box;
+      width: 100%;
+      font-size: 10px;
+      padding: 10px 20px;
+      margin: 0;
+      background: #f8f9fa;
       border-bottom: 1px solid #e9ecef;
+      text-align: center; /* centers content inside the header */
     }
-    .pdf-header__title { font-weight: bold; color: #212529; }
+    .pdf-header__title {
+      font-weight: bold;
+      color: #212529;
+      display: inline-block; /* keeps the text centered nicely */
+    }
   </style>
   <div class="pdf-header">
     <div class="pdf-header__title">${escapedTitle}</div>
