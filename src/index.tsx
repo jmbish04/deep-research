@@ -406,15 +406,61 @@ app.get("/details/:id/download/pdf", async (c) => {
 
 	const content = resp.results.result ?? "";
 	const htmlContent = renderMarkdownReportContent(content);
+	
+	// Extract title from research questions or use a default
+	let reportTitle = "Deep Research Report";
+	try {
+		const questions = JSON.parse(resp.results.questions as unknown as string);
+		if (questions?.[0]?.question) {
+			const unsafeTitle = questions[0].question;
+			// Escape HTML to prevent XSS in the PDF header
+			reportTitle = unsafeTitle
+				.replace(/&/g, "&amp;")
+				.replace(/</g, "&lt;")
+				.replace(/>/g, "&gt;")
+				.replace(/"/g, "&quot;")
+				.replace(/'/g, "&#039;");
+		}
+	} catch (error) {
+		console.error("Failed to parse research questions for PDF title:", error);
+	}
+	
+	// Generate current date for footer
+	const generationDate = new Date().toLocaleDateString('en-US', {
+		year: 'numeric',
+		month: 'long',
+		day: 'numeric'
+	});
 
 	const browser = await puppeteer.launch(c.env.BROWSER);
 	const page = await browser.newPage();
 
-	// // Step 2: Send HTML and CSS to our browser
+	// Step 2: Send HTML and CSS to our browser
 	await page.setContent(htmlContent);
 
-	// // Step 3: Generate and return PDF
-	const pdf = await page.pdf({ printBackground: true });
+	// Step 3: Generate PDF with enhanced formatting
+	const pdf = await page.pdf({
+		printBackground: true,
+		format: 'A4',
+		margin: {
+			top: '1.5in',
+			bottom: '1in', 
+			left: '0.75in',
+			right: '0.75in'
+		},
+		displayHeaderFooter: true,
+		headerTemplate: `
+			<div style="width: 100%; font-size: 10px; padding: 10px 20px; margin: 0; background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+				<div style="font-weight: bold; color: #212529;">${reportTitle}</div>
+			</div>
+		`,
+		footerTemplate: `
+			<div style="width: 100%; font-size: 9px; padding: 10px 20px; margin: 0; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; border-top: 1px solid #e9ecef;">
+				<div style="color: #6c757d;">Generated on ${generationDate}</div>
+				<div style="color: #6c757d;">Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>
+			</div>
+		`
+	});
 
 	// Close browser since we no longer need it
 	await browser.close();
