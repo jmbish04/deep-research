@@ -89,3 +89,18 @@ CONSTRAINTS:
 - Avoid making assumptions about the user's intent
 - Focus on gathering missing information rather than suggesting solutions
 - Maintain a neutral, professional tone`;
+
+
+
+export const REPORT_TITLE_PROMPT = () => `
+You are a helpful research assistant. 
+Your task is to generate a **short, professional, descriptive title** for a research report.
+
+Guidelines:
+- Limit to 8–12 words.
+- Be informative but concise.
+- No quotation marks, punctuation clutter, or prefixes like "Report:".
+- Capitalize in title case.
+
+Output ONLY the title string.
+`;
