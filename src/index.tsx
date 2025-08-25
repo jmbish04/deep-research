@@ -18,8 +18,13 @@ import {
 	ResearchStatusHistoryDisplay,
 	TopBar,
 } from "./templates/layout";
+import {
+	createFooterTemplate,
+	createHeaderTemplate,
+} from "./templates/pdfTemplates";
 import type { ResearchType, ResearchTypeDB } from "./types";
 import { formatDuration, getModel } from "./utils";
+import { escapeHtml } from "./utils/escapeHtml";
 
 export { ResearchWorkflow } from "./workflows";
 
@@ -414,34 +419,35 @@ app.get("/details/:id/download/pdf", async (c) => {
 
 	// Extract title from research questions or use a default
 	let reportTitle = "Deep Research Report";
+
 	try {
-		const questions = JSON.parse(resp.results.questions as unknown as string);
-		if (questions?.[0]?.question) {
-			const unsafeTitle = questions[0].question;
-			// Escape HTML to prevent XSS in the PDF header
-			reportTitle = unsafeTitle
-				.replace(/&/g, "&amp;")
-				.replace(/</g, "&lt;")
-				.replace(/>/g, "&gt;")
-				.replace(/"/g, "&quot;")
-				.replace(/'/g, "&#039;");
+		// resp.results.questions is a JSON string array of objects: [{ question: string, answer: string }, ...]
+		const raw = resp?.results?.questions;
+		if (typeof raw === "string" && raw.trim().length) {
+			const questions = JSON.parse(raw) as Array<{
+				question?: string;
+				answer?: string;
+			}>;
+			const first = Array.isArray(questions) ? questions[0] : undefined;
+			const candidate =
+				first && typeof first.question === "string" && first.question.trim()
+					? first.question.trim()
+					: "";
+			reportTitle = candidate || reportTitle;
 		}
-	} catch (error) {
-		console.error("Failed to parse research questions for PDF title:", error);
+	} catch (err) {
+		// Non-fatal: fall back to default title
+		console.error("Failed to parse questions for PDF title:", err);
 	}
 
-	// Generate current date for footer
-	const generationDate = new Date().toLocaleDateString("en-US", {
-		year: "numeric",
-		month: "long",
-		day: "numeric",
-	});
+	const escapedTitle = escapeHtml(reportTitle);
+	const generationDate = new Date().toLocaleString(); // keep locale-aware as in PR
 
 	const browser = await puppeteer.launch(c.env.BROWSER);
 	const page = await browser.newPage();
 
 	// Step 2: Send HTML and CSS to our browser
-	await page.setContent(htmlContent);
+	await page.setContent(htmlContent, { waitUntil: "load" });
 
 	// Step 3: Generate PDF with enhanced formatting
 	const pdf = await page.pdf({
@@ -454,17 +460,8 @@ app.get("/details/:id/download/pdf", async (c) => {
 			right: "0.75in",
 		},
 		displayHeaderFooter: true,
-		headerTemplate: `
-			<div style="width: 100%; font-size: 10px; padding: 10px 20px; margin: 0; background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
-				<div style="font-weight: bold; color: #212529;">${reportTitle}</div>
-			</div>
-		`,
-		footerTemplate: `
-			<div style="width: 100%; font-size: 9px; padding: 10px 20px; margin: 0; display: flex; justify-content: space-between; align-items: center; background: #f8f9fa; border-top: 1px solid #e9ecef;">
-				<div style="color: #6c757d;">Generated on ${generationDate}</div>
-				<div style="color: #6c757d;">Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>
-			</div>
-		`,
+		headerTemplate: createHeaderTemplate(escapedTitle),
+		footerTemplate: createFooterTemplate(generationDate),
 	});
 
 	// Close browser since we no longer need it
