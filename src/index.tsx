@@ -441,7 +441,16 @@ app.get("/details/:id/download/pdf", async (c) => {
 	}
 
 	const escapedTitle = escapeHtml(reportTitle);
-	const generationDate = new Date().toLocaleString(); // keep locale-aware as in PR
+	const generationDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+	const generationDate = new Date().toLocaleDateString(
+		'en-US', { 
+		  year: 'numeric', 
+		  month: 'long', 
+		  day: 'numeric', 
+		  timeZone: 'America/Los_Angeles'   // forces Pacific Time
+		});
+		
+		console.log(`generationDate: ${generationDate}`); 
 
 	const browser = await puppeteer.launch(c.env.BROWSER);
 	const page = await browser.newPage();
