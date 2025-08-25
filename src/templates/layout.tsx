@@ -31,7 +31,11 @@ export const ResearchStatusHistoryDisplay: FC<{
 	const title = isLiveView ? "Live Status Updates" : "Research History Log";
 
 	if (!statusHistory || statusHistory.length === 0) {
-		return <p class={`text-gray-500 ${isLiveView ? 'text-sm' : 'text-xs'}`}>No status updates yet.</p>;
+		return (
+			<p class={`text-gray-500 ${isLiveView ? "text-sm" : "text-xs"}`}>
+				No status updates yet.
+			</p>
+		);
 	}
 
 	// For non-live view, use a more compact rendering.
@@ -71,12 +75,17 @@ export const ResearchStatusHistoryDisplay: FC<{
 
 	// Compact view for historical logs (isLiveView = false)
 	return (
-		<div class={`border rounded-lg bg-gray-50 ${isLiveView ? "p-4 mt-4" : "p-3"}`}>
+		<div
+			class={`border rounded-lg bg-gray-50 ${isLiveView ? "p-4 mt-4" : "p-3"}`}
+		>
 			{/* Title is only needed if it's not part of a collapsible section summary */}
 			{/* <h3 class="text-md font-semibold mb-2">{title}</h3> */}
-			<ul class={`space-y-1 ${isLiveView ? 'space-y-2' : ''}`}>
+			<ul class={`space-y-1 ${isLiveView ? "space-y-2" : ""}`}>
 				{statusHistory.map((entry, index) => (
-					<li key={index} class={`text-gray-700 ${isLiveView ? 'text-sm' : 'text-xs'}`}>
+					<li
+						key={index}
+						class={`text-gray-700 ${isLiveView ? "text-sm" : "text-xs"}`}
+					>
 						{/* Timestamp only for live view, or consider a more compact format for non-live */}
 						{/* {isLiveView && <span class="font-medium">{new Date(entry.timestamp).toLocaleString()}</span>} */}
 						{/* {isLiveView ? ": " : ""} */}
@@ -671,14 +680,21 @@ export const ResearchDetails: FC = (props) => {
 			)}
 
 			{/* Add this new section for research history */}
-			{(researchData.status === 2 || researchData.status === 3) && researchData.statusHistory && researchData.statusHistory.length > 0 && (
-			  <details className="mt-4 mb-8">
-			    <summary className="cursor-pointer font-semibold text-gray-800 mb-3">Research History</summary>
-			    <div className="mt-2">
-			      <ResearchStatusHistoryDisplay statusHistory={researchData.statusHistory} isLiveView={false} />
-			    </div>
-			  </details>
-			)}
+			{(researchData.status === 2 || researchData.status === 3) &&
+				researchData.statusHistory &&
+				researchData.statusHistory.length > 0 && (
+					<details className="mt-4 mb-8">
+						<summary className="cursor-pointer font-semibold text-gray-800 mb-3">
+							Research History
+						</summary>
+						<div className="mt-2">
+							<ResearchStatusHistoryDisplay
+								statusHistory={researchData.statusHistory}
+								isLiveView={false}
+							/>
+						</div>
+					</details>
+				)}
 
 			{/* Report Content - direct child of main */}
 			{researchData.status !== 1 && (

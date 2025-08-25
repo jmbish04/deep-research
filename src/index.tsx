@@ -273,7 +273,12 @@ app.get("/details/:id", async (c) => {
 		.replaceAll("```", "");
 
 	let statusHistory: any[] = [];
-	if (resp.results && (resp.results.status === 1 || resp.results.status === 2 || resp.results.status === 3)) {
+	if (
+		resp.results &&
+		(resp.results.status === 1 ||
+			resp.results.status === 2 ||
+			resp.results.status === 3)
+	) {
 		const historyQb = new D1QB(c.env.DB);
 		const queryBuilder = historyQb
 			.select<{ status_text: string; timestamp: string }>(
@@ -406,7 +411,7 @@ app.get("/details/:id/download/pdf", async (c) => {
 
 	const content = resp.results.result ?? "";
 	const htmlContent = renderMarkdownReportContent(content);
-	
+
 	// Extract title from research questions or use a default
 	let reportTitle = "Deep Research Report";
 	try {
@@ -424,12 +429,12 @@ app.get("/details/:id/download/pdf", async (c) => {
 	} catch (error) {
 		console.error("Failed to parse research questions for PDF title:", error);
 	}
-	
+
 	// Generate current date for footer
-	const generationDate = new Date().toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'long',
-		day: 'numeric'
+	const generationDate = new Date().toLocaleDateString("en-US", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
 	});
 
 	const browser = await puppeteer.launch(c.env.BROWSER);
@@ -441,12 +446,12 @@ app.get("/details/:id/download/pdf", async (c) => {
 	// Step 3: Generate PDF with enhanced formatting
 	const pdf = await page.pdf({
 		printBackground: true,
-		format: 'A4',
+		format: "A4",
 		margin: {
-			top: '1.5in',
-			bottom: '1in', 
-			left: '0.75in',
-			right: '0.75in'
+			top: "1.5in",
+			bottom: "1in",
+			left: "0.75in",
+			right: "0.75in",
 		},
 		displayHeaderFooter: true,
 		headerTemplate: `
@@ -459,7 +464,7 @@ app.get("/details/:id/download/pdf", async (c) => {
 				<div style="color: #6c757d;">Generated on ${generationDate}</div>
 				<div style="color: #6c757d;">Page <span class="pageNumber"></span> of <span class="totalPages"></span></div>
 			</div>
-		`
+		`,
 	});
 
 	// Close browser since we no longer need it
