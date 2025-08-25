@@ -441,7 +441,7 @@ app.get("/details/:id/download/pdf", async (c) => {
 	}
 
 	const escapedTitle = escapeHtml(reportTitle);
-	const generationDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+	// const generationDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 	const generationDate = new Date().toLocaleDateString(
 		'en-US', { 
 		  year: 'numeric', 
