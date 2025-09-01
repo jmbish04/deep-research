@@ -17,6 +17,9 @@ import {
 	webSearch,
 } from "./webSearch";
 
+const MAX_LEARNINGS_FOR_QUERY = 100;
+const MAX_LEARNINGS_FOR_REPORT = 1000;
+
 async function deepResearch({
 	step,
 	env,
@@ -316,9 +319,10 @@ export async function generateSerpQueries({
 }) {
 	const model = getModel(env);
 	const system = RESEARCH_PROMPT();
+	const trimmedLearnings = learnings?.slice(-MAX_LEARNINGS_FOR_QUERY);
 	const prompt = `Generate up to ${numQueries} unique SERP queries for the following prompt: <prompt>${query}</prompt>${
-		learnings
-			? `\nIncorporate these previous learnings:\n${learnings.join("\n")}`
+		trimmedLearnings && trimmedLearnings.length > 0
+			? `\nIncorporate these previous learnings:\n${trimmedLearnings.join("\n")}`
 			: ""
 	}`;
 	const schema = z.object({
@@ -375,7 +379,8 @@ export async function writeFinalReport({
 	learnings: string[];
 	visitedUrls: string[];
 }) {
-	const learningsString = learnings
+	const limitedLearnings = learnings.slice(-MAX_LEARNINGS_FOR_REPORT);
+	const learningsString = limitedLearnings
 		.map((l) => `<learning>\n${l}\n</learning>`)
 		.join("\n");
 
